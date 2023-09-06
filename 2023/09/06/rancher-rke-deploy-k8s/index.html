@@ -1,0 +1,174 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>rancher RKE部署k8s集群 | ryan zou</title>
+
+  
+  <meta name="author" content="ryan zou">
+  
+
+  
+  <meta name="description" content="a man, likes hiking and camping">
+  
+
+  
+  
+  <meta name="keywords" content="k8s">
+  
+
+  <meta id="viewport" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <meta property="og:title" content="rancher RKE部署k8s集群"/>
+
+  <meta property="og:site_name" content="ryan zou"/>
+
+  
+  <meta property="og:image" content="/favicon.ico"/>
+  
+
+  <link href="/favicon.ico" rel="icon">
+  <link rel="alternate" href="/atom.xml" title="ryan zou" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+<div class="blog">
+  <div class="content">
+
+    <header>
+  <div class="site-branding">
+    <h1 class="site-title">
+      <a href="/">ryan zou</a>
+    </h1>
+    <p class="site-description"></p>
+  </div>
+  <nav class="site-navigation">
+    <ul>
+      
+        <li><a href="/">Home</a></li>
+      
+        <li><a href="/archives">Archives</a></li>
+      
+        <li><a href="/about">About</a></li>
+      
+    </ul>
+  </nav>
+</header>
+
+    <main class="site-main posts-loop">
+    <article>
+
+  
+    
+    <h3 class="article-title"><span>rancher RKE部署k8s集群</span></h3>
+    
+  
+
+  <div class="article-top-meta">
+    <span class="posted-on">
+      <a href="/2023/09/06/rancher-rke-deploy-k8s/" rel="bookmark">
+        <time class="entry-date published" datetime="2023-09-06T03:39:55.000Z">
+          2023-09-06
+        </time>
+      </a>
+    </span>
+  </div>
+
+
+  
+
+  <div class="article-content">
+    <div class="entry">
+      
+        <h2 id="部署步骤"><a href="#部署步骤" class="headerlink" title="部署步骤"></a>部署步骤</h2><p>该文档以3台服务器为例</p>
+<h3 id="1-在每台服务器上添加rke执行操作的用户"><a href="#1-在每台服务器上添加rke执行操作的用户" class="headerlink" title="1. 在每台服务器上添加rke执行操作的用户"></a>1. 在每台服务器上添加rke执行操作的用户</h3><p>安装docker</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl https://releases.rancher.com/install-docker/20.10.sh | sh</span><br></pre></td></tr></table></figure>
+
+<p>用户需要有使用docker的权限</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">useradd rke;</span><br><span class="line"># useradd -m -s /bin/bash rke</span><br><span class="line">echo &quot;rke:123456&quot; | chpasswd</span><br><span class="line">sudo usermod -aG docker rke;</span><br></pre></td></tr></table></figure>
+<p>这个地方注意本机的公钥需要上传到目标服务器， 否则rke允许的时候会报WARN,导致失败</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ssh-keygen;</span><br><span class="line">ssh-copy-id -i ~/.ssh/id_rsa.pub 192.168.1.1;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-下载rancher-rke二进制文件并安装"><a href="#2-下载rancher-rke二进制文件并安装" class="headerlink" title="2. 下载rancher rke二进制文件并安装"></a>2. 下载rancher rke二进制文件并安装</h3><h4 id="1-下载rke"><a href="#1-下载rke" class="headerlink" title="1. 下载rke"></a>1. 下载rke</h4><p>rke二进制文件下载：<a target="_blank" rel="noopener" href="https://github.com/rancher/rke/releases">https://github.com/rancher/rke/releases</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">wget https://github.com/rancher/rke/releases/download/v1.4.3/rke_linux-amd64;</span><br><span class="line">chmod +x rke_linux-amd64</span><br><span class="line">mv ./rke_linux-amd64 ./rke;</span><br></pre></td></tr></table></figure>
+<h4 id="2-安装k8s集群"><a href="#2-安装k8s集群" class="headerlink" title="2. 安装k8s集群"></a>2. 安装k8s集群</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./rke up --config cluster.yaml;</span><br></pre></td></tr></table></figure>
+<p>集群构建成功后控制台会打印 Finished building Kubernetes cluster successfully<br>保存cluster.rkestate，kube_config_cluster.yaml作为k8s管理集群的凭据。</p>
+<h3 id="3-安装kubectl"><a href="#3-安装kubectl" class="headerlink" title="3. 安装kubectl"></a>3. 安装kubectl</h3><h4 id="1-下载kubectl"><a href="#1-下载kubectl" class="headerlink" title="1. 下载kubectl"></a>1. 下载kubectl</h4><p>kubectl 版本和集群版本之间的差异必须在一个小版本号内</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">curl -LO &quot;https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl&quot;;</span><br><span class="line">curl -LO &quot;https://dl.k8s.io/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256&quot;</span><br></pre></td></tr></table></figure>
+<p>校验文件</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo &quot;$(cat kubectl.sha256)  kubectl&quot; | sha256sum --check</span><br></pre></td></tr></table></figure>
+<p>通过时输出为</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl: OK</span><br></pre></td></tr></table></figure>
+<h4 id="2-安装kubectl"><a href="#2-安装kubectl" class="headerlink" title="2.安装kubectl"></a>2.安装kubectl</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl;</span><br></pre></td></tr></table></figure>
+<h4 id="3-验证"><a href="#3-验证" class="headerlink" title="3.验证"></a>3.验证</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl version --client</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-配置kubectl"><a href="#3-配置kubectl" class="headerlink" title="3. 配置kubectl"></a>3. 配置kubectl</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mkdir ~/.kube</span><br><span class="line">mv ./kube_config_cluster.yaml ~/.kube/config</span><br></pre></td></tr></table></figure>
+
+<h4 id="4-验证"><a href="#4-验证" class="headerlink" title="4. 验证"></a>4. 验证</h4><p>查看所有节点</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get node</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-helm-chart安装"><a href="#4-helm-chart安装" class="headerlink" title="4. helm chart安装"></a>4. helm chart安装</h3><h4 id="1-安装helm"><a href="#1-安装helm" class="headerlink" title="1. 安装helm"></a>1. 安装helm</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg &gt; /dev/null;</span><br><span class="line">sudo apt-get install apt-transport-https --yes;</span><br><span class="line">echo &quot;deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main&quot; | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list;</span><br><span class="line">sudo apt-get update;</span><br><span class="line">sudo apt-get install helm;</span><br></pre></td></tr></table></figure>
+<h4 id="2-初始化"><a href="#2-初始化" class="headerlink" title="2. 初始化"></a>2. 初始化</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">helm repo add bitnami https://charts.bitnami.com/bitnami;</span><br><span class="line">helm repo update;</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-docker安装单机rancher"><a href="#5-docker安装单机rancher" class="headerlink" title="5. docker安装单机rancher"></a>5. docker安装单机rancher</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo docker run -d --restart=unless-stopped -p 80:80 -p 443:443 rancher/rancher</span><br></pre></td></tr></table></figure>
+
+<h2 id="常见问题"><a href="#常见问题" class="headerlink" title="常见问题"></a>常见问题</h2><p>清理脚本: clear_env.sh，worder和master执行，<br>删除cluster.rkestate，kube_config_cluster.yaml缓存，&#x2F;etc&#x2F;kubernetes&#x2F;*目录<br>ssh密钥配置问题。</p>
+
+      
+    </div>
+
+  </div>
+
+  <div class="article-footer">
+    <div class="article-meta pull-left">
+
+    
+
+    
+    
+
+    <span class="post-tags">
+      <i class="icon-tags"></i>
+        <a href="/tags/k8s/">k8s</a>
+    </span>
+    
+
+    </div>
+
+    
+  </div>
+</article>
+
+  
+
+
+
+
+
+
+
+
+
+    </main>
+
+    <footer class="site-footer">
+  <p class="site-info">
+    Proudly powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and
+    Theme by <a href="https://github.com/CodeDaraW/Hacker" target="_blank">Hacker</a>
+    </br>
+    
+    &copy; 2023 ryan zou
+    
+  </p>
+</footer>
+    
+    
+  </div>
+</div>
+</body>
+</html>

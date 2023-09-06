@@ -1,0 +1,177 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>argo cd部署 | ryan zou</title>
+
+  
+  <meta name="author" content="ryan zou">
+  
+
+  
+  <meta name="description" content="a man, likes hiking and camping">
+  
+
+  
+  
+  <meta name="keywords" content="k8s,argocd">
+  
+
+  <meta id="viewport" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <meta property="og:title" content="argo cd部署"/>
+
+  <meta property="og:site_name" content="ryan zou"/>
+
+  
+  <meta property="og:image" content="/favicon.ico"/>
+  
+
+  <link href="/favicon.ico" rel="icon">
+  <link rel="alternate" href="/atom.xml" title="ryan zou" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+<div class="blog">
+  <div class="content">
+
+    <header>
+  <div class="site-branding">
+    <h1 class="site-title">
+      <a href="/">ryan zou</a>
+    </h1>
+    <p class="site-description"></p>
+  </div>
+  <nav class="site-navigation">
+    <ul>
+      
+        <li><a href="/">Home</a></li>
+      
+        <li><a href="/archives">Archives</a></li>
+      
+        <li><a href="/about">About</a></li>
+      
+    </ul>
+  </nav>
+</header>
+
+    <main class="site-main posts-loop">
+    <article>
+
+  
+    
+    <h3 class="article-title"><span>argo cd部署</span></h3>
+    
+  
+
+  <div class="article-top-meta">
+    <span class="posted-on">
+      <a href="/2023/09/06/argocd-deploy/" rel="bookmark">
+        <time class="entry-date published" datetime="2023-09-06T06:42:06.000Z">
+          2023-09-06
+        </time>
+      </a>
+    </span>
+  </div>
+
+
+  
+
+  <div class="article-content">
+    <div class="entry">
+      
+        <h3 id="安装argo-cd"><a href="#安装argo-cd" class="headerlink" title="安装argo cd"></a>安装argo cd</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">kubectl create namespace argocd</span><br><span class="line">kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml</span><br></pre></td></tr></table></figure>
+
+<p>配置ingress暴露argocd ui</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">piVersion:</span> <span class="string">networking.k8s.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Ingress</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">argocd-server-ingress</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">argocd</span></span><br><span class="line">  <span class="attr">annotations:</span></span><br><span class="line">    <span class="attr">kubernetes.io/ingress.class:</span> <span class="string">nginx</span></span><br><span class="line">    <span class="attr">nginx.io/tls-acme:</span> <span class="string">&quot;true&quot;</span></span><br><span class="line">    <span class="attr">nginx.ingress.kubernetes.io/backend-protocol:</span> <span class="string">&quot;HTTPS&quot;</span> </span><br><span class="line">    <span class="attr">nginx.ingress.kubernetes.io/force-ssl-redirect:</span> <span class="string">&quot;true&quot;</span></span><br><span class="line">    <span class="attr">nginx.ingress.kubernetes.io/ssl-passthrough:</span> <span class="string">&quot;true&quot;</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">rules:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">host:</span> <span class="string">argocd.xxx.top</span></span><br><span class="line">      <span class="attr">http:</span></span><br><span class="line">        <span class="attr">paths:</span></span><br><span class="line">          <span class="bullet">-</span> <span class="attr">path:</span> <span class="string">/</span></span><br><span class="line">            <span class="attr">pathType:</span> <span class="string">Prefix</span></span><br><span class="line">            <span class="attr">backend:</span></span><br><span class="line">              <span class="attr">service:</span></span><br><span class="line">                <span class="attr">name:</span> <span class="string">argocd-server</span></span><br><span class="line">                <span class="attr">port:</span></span><br><span class="line">                  <span class="attr">name:</span> <span class="string">https</span></span><br><span class="line">  <span class="attr">tls:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">hosts:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">argocd.xxx.top</span></span><br><span class="line">    <span class="attr">secretName:</span> <span class="string">wildcard-letsencrypt-tls</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>获取agrocd管理员密码</p>
+<p>账号admin</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath=&quot;&#123;.data.password&#125;&quot; | base64 -d; echo</span><br></pre></td></tr></table></figure>
+
+<p>获取context地址</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl config view -o jsonpath=&#x27;&#123;.current-context&#125;&#x27;</span><br></pre></td></tr></table></figure>
+
+<h3 id="测试项目运行"><a href="#测试项目运行" class="headerlink" title="测试项目运行"></a>测试项目运行</h3><p>编写application.yaml文件,替换<code>repoURL</code>为仓库地址</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">argoproj.io/v1alpha1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Application</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">myapp-argo-application</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">argocd</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">project:</span> <span class="string">default</span></span><br><span class="line"></span><br><span class="line">  <span class="attr">source:</span></span><br><span class="line">    <span class="attr">repoURL:</span> <span class="string">https://github.com/xxx/argocd-lab.git</span></span><br><span class="line">    <span class="attr">targetRevision:</span> <span class="string">HEAD</span></span><br><span class="line">    <span class="attr">path:</span> <span class="string">dev</span></span><br><span class="line">  <span class="attr">destination:</span></span><br><span class="line">    <span class="attr">server:</span> <span class="string">https://kubernetes.default.svc</span></span><br><span class="line">    <span class="attr">namespace:</span> <span class="string">default</span></span><br><span class="line"></span><br><span class="line">  <span class="attr">syncPolicy:</span></span><br><span class="line">    <span class="attr">syncOptions:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">CreateNamespace=true</span></span><br><span class="line"></span><br><span class="line">    <span class="attr">automated:</span></span><br><span class="line">      <span class="attr">selfHeal:</span> <span class="literal">true</span></span><br><span class="line">      <span class="attr">prune:</span> <span class="literal">true</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>运行以下命令,在argocd ui界面即可查看到项目情况,argo默认每3分钟同步git仓库与本地部署状态</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f application.yaml</span><br></pre></td></tr></table></figure>
+
+<h3 id="配置webhook立马更新"><a href="#配置webhook立马更新" class="headerlink" title="配置webhook立马更新"></a>配置webhook立马更新</h3><p>以github为例</p>
+<ul>
+<li>打开github项目设置页</li>
+<li>配置项目webhook地址</li>
+<li>配置webhook secret</li>
+</ul>
+<p>webhook url格式</p>
+<blockquote>
+<p><code>https://argocd.example.com/api/webhook</code>, url结尾必须为&#x2F;api&#x2F;webhook</p>
+</blockquote>
+<p>webhook secret</p>
+<blockquote>
+<p>和下方secret配置保持一致</p>
+</blockquote>
+<p>创建webhook secret</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Secret</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">argocd-secret</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">argocd</span></span><br><span class="line"><span class="attr">type:</span> <span class="string">Opaque</span></span><br><span class="line"><span class="attr">data:</span></span><br><span class="line"><span class="string">...</span></span><br><span class="line"></span><br><span class="line"><span class="attr">stringData:</span></span><br><span class="line">  <span class="comment"># github webhook secret</span></span><br><span class="line">  <span class="attr">webhook.github.secret:</span> <span class="string">shhhh!</span> <span class="string">it&#x27;s</span> <span class="string">a</span> <span class="string">GitHub</span> <span class="string">secret</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># gitlab webhook secret</span></span><br><span class="line">  <span class="attr">webhook.gitlab.secret:</span> <span class="string">shhhh!</span> <span class="string">it&#x27;s</span> <span class="string">a</span> <span class="string">GitLab</span> <span class="string">secret</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># bitbucket webhook secret</span></span><br><span class="line">  <span class="attr">webhook.bitbucket.uuid:</span> <span class="string">your-bitbucket-uuid</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># bitbucket server webhook secret</span></span><br><span class="line">  <span class="attr">webhook.bitbucketserver.secret:</span> <span class="string">shhhh!</span> <span class="string">it&#x27;s</span> <span class="string">a</span> <span class="string">Bitbucket</span> <span class="string">server</span> <span class="string">secret</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># gogs server webhook secret</span></span><br><span class="line">  <span class="attr">webhook.gogs.secret:</span> <span class="string">shhhh!</span> <span class="string">it&#x27;s</span> <span class="string">a</span> <span class="string">gogs</span> <span class="string">server</span> <span class="string">secret</span></span><br></pre></td></tr></table></figure>
+
+<p>运行以下命令创建secret</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f secret.yaml</span><br></pre></td></tr></table></figure>
+      
+    </div>
+
+  </div>
+
+  <div class="article-footer">
+    <div class="article-meta pull-left">
+
+    
+
+    
+    
+
+    <span class="post-tags">
+      <i class="icon-tags"></i>
+        <a href="/tags/k8s/">k8s</a><a href="/tags/argocd/">argocd</a>
+    </span>
+    
+
+    </div>
+
+    
+  </div>
+</article>
+
+  
+
+
+
+
+
+
+
+
+
+    </main>
+
+    <footer class="site-footer">
+  <p class="site-info">
+    Proudly powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and
+    Theme by <a href="https://github.com/CodeDaraW/Hacker" target="_blank">Hacker</a>
+    </br>
+    
+    &copy; 2023 ryan zou
+    
+  </p>
+</footer>
+    
+    
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,501 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>ryan zou</title>
+
+  
+  <meta name="author" content="ryan zou">
+  
+
+  
+  <meta name="description" content="a man, likes hiking and camping">
+  
+
+  
+
+  <meta id="viewport" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  
+
+  <meta property="og:site_name" content="ryan zou"/>
+
+  
+  <meta property="og:image" content="/favicon.ico"/>
+  
+
+  <link href="/favicon.ico" rel="icon">
+  <link rel="alternate" href="/atom.xml" title="ryan zou" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+<div class="blog">
+  <div class="content">
+
+    <header>
+  <div class="site-branding">
+    <h1 class="site-title">
+      <a href="/">ryan zou</a>
+    </h1>
+    <p class="site-description"></p>
+  </div>
+  <nav class="site-navigation">
+    <ul>
+      
+        <li><a href="/">Home</a></li>
+      
+        <li><a href="/archives">Archives</a></li>
+      
+        <li><a href="/about">About</a></li>
+      
+    </ul>
+  </nav>
+</header>
+
+    <main class="site-main posts-loop">
+    
+  <article>
+
+  
+    
+    <h3 class="article-title"><a href="/2023/09/06/argocd-deploy/"><span>argo cd部署</span></a></h3>
+    
+  
+
+  <div class="article-top-meta">
+    <span class="posted-on">
+      <a href="/2023/09/06/argocd-deploy/" rel="bookmark">
+        <time class="entry-date published" datetime="2023-09-06T06:42:06.000Z">
+          2023-09-06
+        </time>
+      </a>
+    </span>
+  </div>
+
+
+  
+
+  <div class="article-content">
+    <div class="entry">
+      
+        <h3 id="安装argo-cd"><a href="#安装argo-cd" class="headerlink" title="安装argo cd"></a>安装argo cd</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">kubectl create namespace argocd</span><br><span class="line">kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml</span><br></pre></td></tr></table></figure>
+
+<p>配置ingress暴露argocd ui</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">piVersion:</span> <span class="string">networking.k8s.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Ingress</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">argocd-server-ingress</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">argocd</span></span><br><span class="line">  <span class="attr">annotations:</span></span><br><span class="line">    <span class="attr">kubernetes.io/ingress.class:</span> <span class="string">nginx</span></span><br><span class="line">    <span class="attr">nginx.io/tls-acme:</span> <span class="string">&quot;true&quot;</span></span><br><span class="line">    <span class="attr">nginx.ingress.kubernetes.io/backend-protocol:</span> <span class="string">&quot;HTTPS&quot;</span> </span><br><span class="line">    <span class="attr">nginx.ingress.kubernetes.io/force-ssl-redirect:</span> <span class="string">&quot;true&quot;</span></span><br><span class="line">    <span class="attr">nginx.ingress.kubernetes.io/ssl-passthrough:</span> <span class="string">&quot;true&quot;</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">rules:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">host:</span> <span class="string">argocd.xxx.top</span></span><br><span class="line">      <span class="attr">http:</span></span><br><span class="line">        <span class="attr">paths:</span></span><br><span class="line">          <span class="bullet">-</span> <span class="attr">path:</span> <span class="string">/</span></span><br><span class="line">            <span class="attr">pathType:</span> <span class="string">Prefix</span></span><br><span class="line">            <span class="attr">backend:</span></span><br><span class="line">              <span class="attr">service:</span></span><br><span class="line">                <span class="attr">name:</span> <span class="string">argocd-server</span></span><br><span class="line">                <span class="attr">port:</span></span><br><span class="line">                  <span class="attr">name:</span> <span class="string">https</span></span><br><span class="line">  <span class="attr">tls:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">hosts:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">argocd.xxx.top</span></span><br><span class="line">    <span class="attr">secretName:</span> <span class="string">wildcard-letsencrypt-tls</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>获取agrocd管理员密码</p>
+<p>账号admin</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath=&quot;&#123;.data.password&#125;&quot; | base64 -d; echo</span><br></pre></td></tr></table></figure>
+
+<p>获取context地址</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl config view -o jsonpath=&#x27;&#123;.current-context&#125;&#x27;</span><br></pre></td></tr></table></figure>
+
+<h3 id="测试项目运行"><a href="#测试项目运行" class="headerlink" title="测试项目运行"></a>测试项目运行</h3><p>编写application.yaml文件,替换<code>repoURL</code>为仓库地址</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">argoproj.io/v1alpha1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Application</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">myapp-argo-application</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">argocd</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">project:</span> <span class="string">default</span></span><br><span class="line"></span><br><span class="line">  <span class="attr">source:</span></span><br><span class="line">    <span class="attr">repoURL:</span> <span class="string">https://github.com/xxx/argocd-lab.git</span></span><br><span class="line">    <span class="attr">targetRevision:</span> <span class="string">HEAD</span></span><br><span class="line">    <span class="attr">path:</span> <span class="string">dev</span></span><br><span class="line">  <span class="attr">destination:</span></span><br><span class="line">    <span class="attr">server:</span> <span class="string">https://kubernetes.default.svc</span></span><br><span class="line">    <span class="attr">namespace:</span> <span class="string">default</span></span><br><span class="line"></span><br><span class="line">  <span class="attr">syncPolicy:</span></span><br><span class="line">    <span class="attr">syncOptions:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">CreateNamespace=true</span></span><br><span class="line"></span><br><span class="line">    <span class="attr">automated:</span></span><br><span class="line">      <span class="attr">selfHeal:</span> <span class="literal">true</span></span><br><span class="line">      <span class="attr">prune:</span> <span class="literal">true</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>运行以下命令,在argocd ui界面即可查看到项目情况,argo默认每3分钟同步git仓库与本地部署状态</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f application.yaml</span><br></pre></td></tr></table></figure>
+
+<h3 id="配置webhook立马更新"><a href="#配置webhook立马更新" class="headerlink" title="配置webhook立马更新"></a>配置webhook立马更新</h3><p>以github为例</p>
+<ul>
+<li>打开github项目设置页</li>
+<li>配置项目webhook地址</li>
+<li>配置webhook secret</li>
+</ul>
+<p>webhook url格式</p>
+<blockquote>
+<p><code>https://argocd.example.com/api/webhook</code>, url结尾必须为&#x2F;api&#x2F;webhook</p>
+</blockquote>
+<p>webhook secret</p>
+<blockquote>
+<p>和下方secret配置保持一致</p>
+</blockquote>
+<p>创建webhook secret</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Secret</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">argocd-secret</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">argocd</span></span><br><span class="line"><span class="attr">type:</span> <span class="string">Opaque</span></span><br><span class="line"><span class="attr">data:</span></span><br><span class="line"><span class="string">...</span></span><br><span class="line"></span><br><span class="line"><span class="attr">stringData:</span></span><br><span class="line">  <span class="comment"># github webhook secret</span></span><br><span class="line">  <span class="attr">webhook.github.secret:</span> <span class="string">shhhh!</span> <span class="string">it&#x27;s</span> <span class="string">a</span> <span class="string">GitHub</span> <span class="string">secret</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># gitlab webhook secret</span></span><br><span class="line">  <span class="attr">webhook.gitlab.secret:</span> <span class="string">shhhh!</span> <span class="string">it&#x27;s</span> <span class="string">a</span> <span class="string">GitLab</span> <span class="string">secret</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># bitbucket webhook secret</span></span><br><span class="line">  <span class="attr">webhook.bitbucket.uuid:</span> <span class="string">your-bitbucket-uuid</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># bitbucket server webhook secret</span></span><br><span class="line">  <span class="attr">webhook.bitbucketserver.secret:</span> <span class="string">shhhh!</span> <span class="string">it&#x27;s</span> <span class="string">a</span> <span class="string">Bitbucket</span> <span class="string">server</span> <span class="string">secret</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># gogs server webhook secret</span></span><br><span class="line">  <span class="attr">webhook.gogs.secret:</span> <span class="string">shhhh!</span> <span class="string">it&#x27;s</span> <span class="string">a</span> <span class="string">gogs</span> <span class="string">server</span> <span class="string">secret</span></span><br></pre></td></tr></table></figure>
+
+<p>运行以下命令创建secret</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f secret.yaml</span><br></pre></td></tr></table></figure>
+      
+    </div>
+
+  </div>
+
+  <div class="article-footer">
+    <div class="article-meta pull-left">
+
+    
+
+    
+    
+
+    <span class="post-tags">
+      <i class="icon-tags"></i>
+        <a href="/tags/k8s/">k8s</a><a href="/tags/argocd/">argocd</a>
+    </span>
+    
+
+    </div>
+
+    
+  </div>
+</article>
+
+
+
+  <article>
+
+  
+    
+    <h3 class="article-title"><a href="/2023/09/06/issuer-cert-by-cert-manager/"><span>cert-manager签发证书</span></a></h3>
+    
+  
+
+  <div class="article-top-meta">
+    <span class="posted-on">
+      <a href="/2023/09/06/issuer-cert-by-cert-manager/" rel="bookmark">
+        <time class="entry-date published" datetime="2023-09-06T06:40:45.000Z">
+          2023-09-06
+        </time>
+      </a>
+    </span>
+  </div>
+
+
+  
+
+  <div class="article-content">
+    <div class="entry">
+      
+        <h3 id="安装cert-manager"><a href="#安装cert-manager" class="headerlink" title="安装cert-manager"></a>安装cert-manager</h3><p>cert-manager 将证书和证书颁发者作为资源类型添加到 Kubernetes 集群中，并简化了获取、更新和使用这些证书的过程</p>
+<p>它可以从各种受支持的来源颁发证书，包括 Let’s Encrypt、HashiCorp Vault 和 Venafi 以及私有 PKI</p>
+<p>它将确保证书有效且是最新的，并在到期前的配置时间尝试更新证书</p>
+<h4 id="添加-cert-manager-仓库"><a href="#添加-cert-manager-仓库" class="headerlink" title="添加 cert-manager 仓库"></a>添加 cert-manager 仓库</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">helm repo add jetstack https://charts.jetstack.io</span><br><span class="line">helm repo update</span><br></pre></td></tr></table></figure>
+
+<p>生成 values.yaml</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">helm show values jetstack/cert-manager &gt; values.yaml</span><br></pre></td></tr></table></figure>
+
+<p>修改 values.yaml</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">installCRDs:</span> <span class="literal">true</span></span><br><span class="line"></span><br><span class="line"><span class="attr">prometheus:</span></span><br><span class="line">  <span class="attr">enabled:</span> <span class="literal">false</span></span><br><span class="line"></span><br><span class="line"><span class="attr">webhook:</span></span><br><span class="line">  <span class="attr">timeoutSeconds:</span> <span class="number">10</span></span><br></pre></td></tr></table></figure>
+
+<p>如果想查看生成的清单，可以使用</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">helm template cert-manager jetstack/cert-manager -n cert-manager -f values.yaml &gt; cert-manager.yaml</span><br></pre></td></tr></table></figure>
+
+<p>安装 cert-manager</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">helm install cert-manager jetstack/cert-manager -n cert-manager --create-namespace -f values.yaml</span><br></pre></td></tr></table></figure>
+
+<p>等待</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">kubectl wait --for=condition=Ready pods --all -n cert-manager</span><br><span class="line"></span><br><span class="line"># pod/cert-manager-55d85487cb-bmn5k condition met</span><br><span class="line"># pod/cert-manager-cainjector-58448cbc99-wwrbg condition met</span><br><span class="line"># pod/cert-manager-webhook-89f77959f-gmxvs condition met</span><br></pre></td></tr></table></figure>
+
+<h3 id="创建-Issuer"><a href="#创建-Issuer" class="headerlink" title="创建 Issuer"></a>创建 Issuer</h3><p>Let’s Encrypt 利用 ACME (Automated Certificate Management Environment) 协议校验域名的归属，校验成功后可以自动颁发免费证书。免费证书有效期只有 90 天，需在到期前再校验一次实现续期。使用 cert-manager 可以自动续期，即实现永久使用免费证书。校验域名归属的两种方式分别是 HTTP-01 和 DNS-01，校验原理详情可参见 Let’s Encrypt 的运作方式</p>
+<p>DNS-01 校验支持泛域名， 但是是不同 DNS 提供商的配置方式不同，DNS 提供商过多而 cert-manager 的 Issuer 不能全部支持。部分可以通过部署实现 cert-manager 的 Webhook 服务来扩展 Issuer 进行支持。例如阿里 DNS 就是通过 Webhook 的方式进行支持</p>
+<p>以cloudflare为例</p>
+<ol>
+<li>添加 DNS 记录</li>
+<li>前往个人资料 -&gt; API 令牌， 使用编辑区域 DNS 模版， 创建一个 token</li>
+</ol>
+<p>测试令牌是否能正常工作：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">curl -X GET <span class="string">&quot;https://api.cloudflare.com/client/v4/user/tokens/verify&quot;</span> \</span><br><span class="line">     -H <span class="string">&quot;Authorization: Bearer &lt;yout api token&gt;&quot;</span> \</span><br><span class="line">     -H <span class="string">&quot;Content-Type:application/json&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>将得到的 token，保存到 .env 文件中</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># .env</span><br><span class="line"># api-token=&lt;token&gt;</span><br><span class="line">api-token=wq</span><br></pre></td></tr></table></figure>
+
+<p>使用 Kustomize 来管理该 token</p>
+<p>编写 kustomization.yaml</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># kustomization.yaml</span></span><br><span class="line"><span class="attr">resources:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">letsencrypt-issuer.yaml</span></span><br><span class="line"><span class="attr">namespace:</span> <span class="string">cert-manager</span></span><br><span class="line"><span class="attr">secretGenerator:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">cloudflare-api-token-secret</span></span><br><span class="line">    <span class="attr">envs:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">.env</span> <span class="comment"># token 就存放在这里</span></span><br><span class="line"><span class="attr">generatorOptions:</span></span><br><span class="line">  <span class="attr">disableNameSuffixHash:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+<p>我们使用 Kustomize 来生成一个名为 cloudflare-api-token-secret 的 Secret, 该 Secret 被下面的清单使用</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># letsencrypt-issuer.yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">cert-manager.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ClusterIssuer</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">letsencrypt-dns01</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">acme:</span></span><br><span class="line">    <span class="attr">privateKeySecretRef:</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">letsencrypt-dns01</span></span><br><span class="line">    <span class="attr">server:</span> <span class="string">https://acme-v02.api.letsencrypt.org/directory</span></span><br><span class="line">    <span class="attr">solvers:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">dns01:</span></span><br><span class="line">          <span class="attr">cloudflare:</span></span><br><span class="line">            <span class="attr">email:</span> <span class="string">xx@163.com</span> <span class="comment"># 替换成你的 cloudflare 邮箱账号</span></span><br><span class="line">            <span class="attr">apiTokenSecretRef:</span></span><br><span class="line">              <span class="attr">key:</span> <span class="string">api-token</span></span><br><span class="line">              <span class="attr">name:</span> <span class="string">cloudflare-api-token-secret</span> <span class="comment"># 引用保存 cloudflare 认证信息的 Secret</span></span><br></pre></td></tr></table></figure>
+<p>所生成的 Secret 可以使用下面的命令来检查</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl kustomize ./</span><br></pre></td></tr></table></figure>
+
+<p>如无问题，运行如下命令，创建 issuer</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -k ./</span><br></pre></td></tr></table></figure>
+
+<p>查看 Let’t Encrypt 注册状态</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl describe clusterissuer letsencrypt-dns01</span><br></pre></td></tr></table></figure>
+
+<p>输出Status:True 表示注册成功</p>
+<h3 id="创建-Certificate"><a href="#创建-Certificate" class="headerlink" title="创建 Certificate"></a>创建 Certificate</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f certificate.yaml</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># certificate.yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">cert-manager.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Certificate</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">wildcard-todoit-tech</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">default</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">dnsNames:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">&quot;*.xxx.tech&quot;</span> <span class="comment"># 要签发证书的域名，替换成你自己的</span></span><br><span class="line">  <span class="attr">issuerRef:</span></span><br><span class="line">    <span class="attr">kind:</span> <span class="string">ClusterIssuer</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">letsencrypt-dns01</span> <span class="comment"># 引用 ClusterIssuer，名字和 letsencrypt-issuer.yaml 中保持一致</span></span><br><span class="line">  <span class="attr">secretName:</span> <span class="string">wildcard-letsencrypt-tls</span> <span class="comment"># 最终签发出来的证书会保存在这个 Secret 里面</span></span><br></pre></td></tr></table></figure>
+
+<p>查看证书是否签发成功</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">kubectl get certificate -w</span><br><span class="line"></span><br><span class="line"># NAME                   READY   SECRET                     AGE</span><br><span class="line"># wildcard-todoit-tech   False   wildcard-letsencrypt-tls   8s</span><br><span class="line"># wildcard-todoit-tech   False   wildcard-letsencrypt-tls   94s</span><br><span class="line"># wildcard-todoit-tech   False   wildcard-letsencrypt-tls   94s</span><br><span class="line"># wildcard-todoit-tech   True    wildcard-letsencrypt-tls   94s</span><br></pre></td></tr></table></figure>
+
+<p>注意事项：Let’s Encrypt 一个星期内只为同一个域名颁发 5 次证书，xxx.tech 和 whoami.xxx.tech 被视为不同的域名</p>
+<h3 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f whoami.yaml</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cert/whoami.yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">whoami</span></span><br><span class="line">  <span class="attr">labels:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">containous</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">whoami</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">replicas:</span> <span class="number">2</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">matchLabels:</span></span><br><span class="line">      <span class="attr">app:</span> <span class="string">containous</span></span><br><span class="line">      <span class="attr">task:</span> <span class="string">whoami</span></span><br><span class="line">  <span class="attr">template:</span></span><br><span class="line">    <span class="attr">metadata:</span></span><br><span class="line">      <span class="attr">labels:</span></span><br><span class="line">        <span class="attr">app:</span> <span class="string">containous</span></span><br><span class="line">        <span class="attr">task:</span> <span class="string">whoami</span></span><br><span class="line">    <span class="attr">spec:</span></span><br><span class="line">      <span class="attr">containers:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">containouswhoami</span></span><br><span class="line">          <span class="attr">image:</span> <span class="string">containous/whoami</span></span><br><span class="line">          <span class="attr">resources:</span></span><br><span class="line">          <span class="attr">ports:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">containerPort:</span> <span class="number">80</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">whoami</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">ports:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">http</span></span><br><span class="line">      <span class="attr">port:</span> <span class="number">80</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">containous</span></span><br><span class="line">    <span class="attr">task:</span> <span class="string">whoami</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">ClusterIP</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">networking.k8s.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Ingress</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">whoami-ingress</span></span><br><span class="line">  <span class="attr">annotations:</span></span><br><span class="line">    <span class="attr">kubernetes.io/ingress.class:</span> <span class="string">nginx</span></span><br><span class="line">    <span class="attr">nginx.ingress.kubernetes.io/rewrite-target:</span> <span class="string">/</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">tls:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">hosts:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">&quot;whoami.xxx.tech&quot;</span></span><br><span class="line">      <span class="attr">secretName:</span> <span class="string">wildcard-letsencrypt-tls</span></span><br><span class="line">  <span class="attr">rules:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">host:</span> <span class="string">whoami.xxx.tech</span></span><br><span class="line">      <span class="attr">http:</span></span><br><span class="line">        <span class="attr">paths:</span></span><br><span class="line">          <span class="bullet">-</span> <span class="attr">path:</span> <span class="string">/</span></span><br><span class="line">            <span class="attr">pathType:</span> <span class="string">Prefix</span></span><br><span class="line">            <span class="attr">backend:</span></span><br><span class="line">              <span class="attr">service:</span></span><br><span class="line">                <span class="attr">name:</span> <span class="string">whoami</span></span><br><span class="line">                <span class="attr">port:</span></span><br><span class="line">                  <span class="attr">number:</span> <span class="number">80</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get ingress</span><br></pre></td></tr></table></figure>
+      
+    </div>
+
+  </div>
+
+  <div class="article-footer">
+    <div class="article-meta pull-left">
+
+    
+
+    
+    
+
+    <span class="post-tags">
+      <i class="icon-tags"></i>
+        <a href="/tags/k8s/">k8s</a>
+    </span>
+    
+
+    </div>
+
+    
+  </div>
+</article>
+
+
+
+  <article>
+
+  
+    
+    <h3 class="article-title"><a href="/2023/09/06/nfs-server-deploy/"><span>nfs server 部署</span></a></h3>
+    
+  
+
+  <div class="article-top-meta">
+    <span class="posted-on">
+      <a href="/2023/09/06/nfs-server-deploy/" rel="bookmark">
+        <time class="entry-date published" datetime="2023-09-06T06:08:34.000Z">
+          2023-09-06
+        </time>
+      </a>
+    </span>
+  </div>
+
+
+  
+
+  <div class="article-content">
+    <div class="entry">
+      
+        <p>以ubuntu安装为例</p>
+<h3 id="nfs安装"><a href="#nfs安装" class="headerlink" title="nfs安装"></a>nfs安装</h3><p>安装 NFS 内核服务器包，这实际上会将其变成 NFS 服务器</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt update</span><br><span class="line">sudo apt install nfs-kernel-server</span><br></pre></td></tr></table></figure>
+
+<p>验证 nfs-server 服务是否正在运行</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl status nfs-server</span><br></pre></td></tr></table></figure>
+
+<h3 id="创建-NFS-共享目录"><a href="#创建-NFS-共享目录" class="headerlink" title="创建 NFS 共享目录"></a>创建 NFS 共享目录</h3><p>创建 &#x2F;mnt&#x2F;nfs 文件目录，用于共享</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo mkdir -p /mnt/nfs</span><br></pre></td></tr></table></figure>
+
+<p>分配以下目录所有权和权限,这些权限是递归的，将应用于创建的所有文件和子目录</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo chown nobody:nogroup /mnt/nfs</span><br><span class="line">sudo chmod -R 777 /mnt/nfs</span><br></pre></td></tr></table></figure>
+
+<h3 id="设置访问权限"><a href="#设置访问权限" class="headerlink" title="设置访问权限"></a>设置访问权限</h3><p>创建 NFS 目录共享并分配所需的权限和所有权后，需要允许客户端系统访问 NFS 服务器。通过编辑在安装 nfs-kernel-server 软件包期间创建的 &#x2F;etc&#x2F;exports 文件来实现这一点</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo vim /etc/exports</span><br></pre></td></tr></table></figure>
+
+<p>设置运行访问的 IP 范围, * 表示允许任意 ip 访问。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/mnt/nfs 192.168.32.0/24(rw,sync,no_root_squash,no_subtree_check)</span><br></pre></td></tr></table></figure>
+<p>常用选项：</p>
+<ul>
+<li>ro：客户端挂载后，其权限为只读，默认选项；</li>
+<li>rw:读写权限；</li>
+<li>sync：同时将数据写入到内存与硬盘中；</li>
+<li>async：异步，优先将数据保存到内存，然后再写入硬盘；</li>
+<li>Secure：要求请求源的端口小于1024</li>
+</ul>
+<p>用户映射：</p>
+<ul>
+<li>root_squash:当NFS客户端使用root用户访问时，映射到NFS服务器的匿名用户；</li>
+<li>no_root_squash:当NFS客户端使用root用户访问时，映射到NFS服务器的root用户；</li>
+<li>all_squash:全部用户都映射为服务器端的匿名用户；</li>
+<li>anonuid&#x3D;UID：将客户端登录用户映射为此处指定的用户uid；</li>
+<li>anongid&#x3D;GID：将客户端登录用户映射为此处指定的用户gid</li>
+</ul>
+<h3 id="导出共享目录"><a href="#导出共享目录" class="headerlink" title="导出共享目录"></a>导出共享目录</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo exportfs -a</span><br></pre></td></tr></table></figure>
+
+<p>确定导出列表，可以使用以下命令显示导出列表</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo exportfs -s</span><br><span class="line"># /mnt/nfs  192.168.32.0/24(rw,wdelay,no_root_squash,no_subtree_check,sec=sys,rw,secure,no_root_squash,no_all_squash)</span><br></pre></td></tr></table></figure>
+
+<h3 id="配置防火墙规则"><a href="#配置防火墙规则" class="headerlink" title="配置防火墙规则"></a>配置防火墙规则</h3><p>查看防火墙状态</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo ufw status</span><br><span class="line"># Status: inactive</span><br></pre></td></tr></table></figure>
+
+<p>提示防火墙未激活，很好，否则，我们需要添加如下规则</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo ufw allow from 192.168.32.0/24 to any port nfs</span><br></pre></td></tr></table></figure>
+
+<h3 id="安装-NFS-客户端"><a href="#安装-NFS-客户端" class="headerlink" title="安装 NFS 客户端"></a>安装 NFS 客户端</h3><p>为了让所有的 Worker 节点都可以使用 NFS 服务器，需要在每个 Worker 节点上安装 NFS 客户端。<br>现在登录到 Worker 节点更新包索引并安装 nfs-common</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt update</span><br><span class="line">sudo apt install nfs-common</span><br></pre></td></tr></table></figure>
+
+<h3 id="测试文件挂载"><a href="#测试文件挂载" class="headerlink" title="测试文件挂载"></a>测试文件挂载</h3><p>创建挂载的文件夹</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p /nfs-data</span><br></pre></td></tr></table></figure>
+<p>执行以下命令挂载 nfs 服务器上的共享目录到本机路径<code>/nfs-data</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mount -t nfs -o nolock,vers=4 192.168.32.24:/nfs /nfs-data</span><br></pre></td></tr></table></figure>
+
+<p>参数解释：</p>
+<ul>
+<li>mount：挂载命令</li>
+<li>o：挂载选项</li>
+<li>nfs :使用的协议</li>
+<li>nolock :不阻塞</li>
+<li>vers : 使用的NFS版本号</li>
+<li>IP : NFS服务器的IP（NFS服务器运行在哪个系统上，就是哪个系统的IP）</li>
+<li>&#x2F;nfs: 要挂载的目录（Ubuntu的目录）</li>
+<li>&#x2F;nfs-data : 要挂载到的目录（开发板上的目录，注意挂载成功后，&#x2F;mnt下原有数据将会被隐藏，无法找到）</li>
+</ul>
+<p>查看挂载</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">df -h</span><br></pre></td></tr></table></figure>
+
+<p>卸载挂载</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">umount /nfs-data</span><br></pre></td></tr></table></figure>
+
+<p>检查 nfs 服务器端是否有设置共享目录</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># showmount -e $(nfs服务器的IP)</span><br><span class="line">showmount -e 172.16.106.205</span><br><span class="line"></span><br><span class="line"># 输出结果如下所示</span><br><span class="line">Export list for 172.16.106.205:</span><br><span class="line">/nfs *</span><br></pre></td></tr></table></figure>
+
+<p>查看nfs版本</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># 查看nfs服务端信息(服务端执行)</span><br><span class="line">nfsstat -s</span><br><span class="line"></span><br><span class="line"># 查看nfs客户端信息（客户端执行）</span><br><span class="line">nfsstat -c</span><br></pre></td></tr></table></figure>
+
+<p>写入一个测试文件</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo &quot;hello nfs server&quot; &gt; /nfs-data/test.txt</span><br></pre></td></tr></table></figure>
+
+<p>在 nfs 服务器上执行以下命令，验证文件写入成功：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /nfs/test.txt</span><br></pre></td></tr></table></figure>
+      
+    </div>
+
+  </div>
+
+  <div class="article-footer">
+    <div class="article-meta pull-left">
+
+    
+
+    
+    
+
+    <span class="post-tags">
+      <i class="icon-tags"></i>
+        <a href="/tags/k8s/">k8s</a>
+    </span>
+    
+
+    </div>
+
+    
+  </div>
+</article>
+
+
+
+  <article>
+
+  
+    
+    <h3 class="article-title"><a href="/2023/09/06/rancher-rke-deploy-k8s/"><span>rancher RKE部署k8s集群</span></a></h3>
+    
+  
+
+  <div class="article-top-meta">
+    <span class="posted-on">
+      <a href="/2023/09/06/rancher-rke-deploy-k8s/" rel="bookmark">
+        <time class="entry-date published" datetime="2023-09-06T03:39:55.000Z">
+          2023-09-06
+        </time>
+      </a>
+    </span>
+  </div>
+
+
+  
+
+  <div class="article-content">
+    <div class="entry">
+      
+        <h2 id="部署步骤"><a href="#部署步骤" class="headerlink" title="部署步骤"></a>部署步骤</h2><p>该文档以3台服务器为例</p>
+<h3 id="1-在每台服务器上添加rke执行操作的用户"><a href="#1-在每台服务器上添加rke执行操作的用户" class="headerlink" title="1. 在每台服务器上添加rke执行操作的用户"></a>1. 在每台服务器上添加rke执行操作的用户</h3><p>安装docker</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl https://releases.rancher.com/install-docker/20.10.sh | sh</span><br></pre></td></tr></table></figure>
+
+<p>用户需要有使用docker的权限</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">useradd rke;</span><br><span class="line"># useradd -m -s /bin/bash rke</span><br><span class="line">echo &quot;rke:123456&quot; | chpasswd</span><br><span class="line">sudo usermod -aG docker rke;</span><br></pre></td></tr></table></figure>
+<p>这个地方注意本机的公钥需要上传到目标服务器， 否则rke允许的时候会报WARN,导致失败</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ssh-keygen;</span><br><span class="line">ssh-copy-id -i ~/.ssh/id_rsa.pub 192.168.1.1;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-下载rancher-rke二进制文件并安装"><a href="#2-下载rancher-rke二进制文件并安装" class="headerlink" title="2. 下载rancher rke二进制文件并安装"></a>2. 下载rancher rke二进制文件并安装</h3><h4 id="1-下载rke"><a href="#1-下载rke" class="headerlink" title="1. 下载rke"></a>1. 下载rke</h4><p>rke二进制文件下载：<a target="_blank" rel="noopener" href="https://github.com/rancher/rke/releases">https://github.com/rancher/rke/releases</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">wget https://github.com/rancher/rke/releases/download/v1.4.3/rke_linux-amd64;</span><br><span class="line">chmod +x rke_linux-amd64</span><br><span class="line">mv ./rke_linux-amd64 ./rke;</span><br></pre></td></tr></table></figure>
+<h4 id="2-安装k8s集群"><a href="#2-安装k8s集群" class="headerlink" title="2. 安装k8s集群"></a>2. 安装k8s集群</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./rke up --config cluster.yaml;</span><br></pre></td></tr></table></figure>
+<p>集群构建成功后控制台会打印 Finished building Kubernetes cluster successfully<br>保存cluster.rkestate，kube_config_cluster.yaml作为k8s管理集群的凭据。</p>
+<h3 id="3-安装kubectl"><a href="#3-安装kubectl" class="headerlink" title="3. 安装kubectl"></a>3. 安装kubectl</h3><h4 id="1-下载kubectl"><a href="#1-下载kubectl" class="headerlink" title="1. 下载kubectl"></a>1. 下载kubectl</h4><p>kubectl 版本和集群版本之间的差异必须在一个小版本号内</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">curl -LO &quot;https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl&quot;;</span><br><span class="line">curl -LO &quot;https://dl.k8s.io/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256&quot;</span><br></pre></td></tr></table></figure>
+<p>校验文件</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo &quot;$(cat kubectl.sha256)  kubectl&quot; | sha256sum --check</span><br></pre></td></tr></table></figure>
+<p>通过时输出为</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl: OK</span><br></pre></td></tr></table></figure>
+<h4 id="2-安装kubectl"><a href="#2-安装kubectl" class="headerlink" title="2.安装kubectl"></a>2.安装kubectl</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl;</span><br></pre></td></tr></table></figure>
+<h4 id="3-验证"><a href="#3-验证" class="headerlink" title="3.验证"></a>3.验证</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl version --client</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-配置kubectl"><a href="#3-配置kubectl" class="headerlink" title="3. 配置kubectl"></a>3. 配置kubectl</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mkdir ~/.kube</span><br><span class="line">mv ./kube_config_cluster.yaml ~/.kube/config</span><br></pre></td></tr></table></figure>
+
+<h4 id="4-验证"><a href="#4-验证" class="headerlink" title="4. 验证"></a>4. 验证</h4><p>查看所有节点</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get node</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-helm-chart安装"><a href="#4-helm-chart安装" class="headerlink" title="4. helm chart安装"></a>4. helm chart安装</h3><h4 id="1-安装helm"><a href="#1-安装helm" class="headerlink" title="1. 安装helm"></a>1. 安装helm</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg &gt; /dev/null;</span><br><span class="line">sudo apt-get install apt-transport-https --yes;</span><br><span class="line">echo &quot;deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main&quot; | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list;</span><br><span class="line">sudo apt-get update;</span><br><span class="line">sudo apt-get install helm;</span><br></pre></td></tr></table></figure>
+<h4 id="2-初始化"><a href="#2-初始化" class="headerlink" title="2. 初始化"></a>2. 初始化</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">helm repo add bitnami https://charts.bitnami.com/bitnami;</span><br><span class="line">helm repo update;</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-docker安装单机rancher"><a href="#5-docker安装单机rancher" class="headerlink" title="5. docker安装单机rancher"></a>5. docker安装单机rancher</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo docker run -d --restart=unless-stopped -p 80:80 -p 443:443 rancher/rancher</span><br></pre></td></tr></table></figure>
+
+<h2 id="常见问题"><a href="#常见问题" class="headerlink" title="常见问题"></a>常见问题</h2><p>清理脚本: clear_env.sh，worder和master执行，<br>删除cluster.rkestate，kube_config_cluster.yaml缓存，&#x2F;etc&#x2F;kubernetes&#x2F;*目录<br>ssh密钥配置问题。</p>
+
+      
+    </div>
+
+  </div>
+
+  <div class="article-footer">
+    <div class="article-meta pull-left">
+
+    
+
+    
+    
+
+    <span class="post-tags">
+      <i class="icon-tags"></i>
+        <a href="/tags/k8s/">k8s</a>
+    </span>
+    
+
+    </div>
+
+    
+  </div>
+</article>
+
+
+
+
+<nav class="pagination">
+  
+  
+</nav>
+    </main>
+
+    <footer class="site-footer">
+  <p class="site-info">
+    Proudly powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and
+    Theme by <a href="https://github.com/CodeDaraW/Hacker" target="_blank">Hacker</a>
+    </br>
+    
+    &copy; 2023 ryan zou
+    
+  </p>
+</footer>
+    
+    
+  </div>
+</div>
+</body>
+</html>

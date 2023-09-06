@@ -1,0 +1,221 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>nfs server 部署 | ryan zou</title>
+
+  
+  <meta name="author" content="ryan zou">
+  
+
+  
+  <meta name="description" content="a man, likes hiking and camping">
+  
+
+  
+  
+  <meta name="keywords" content="k8s">
+  
+
+  <meta id="viewport" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <meta property="og:title" content="nfs server 部署"/>
+
+  <meta property="og:site_name" content="ryan zou"/>
+
+  
+  <meta property="og:image" content="/favicon.ico"/>
+  
+
+  <link href="/favicon.ico" rel="icon">
+  <link rel="alternate" href="/atom.xml" title="ryan zou" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+<div class="blog">
+  <div class="content">
+
+    <header>
+  <div class="site-branding">
+    <h1 class="site-title">
+      <a href="/">ryan zou</a>
+    </h1>
+    <p class="site-description"></p>
+  </div>
+  <nav class="site-navigation">
+    <ul>
+      
+        <li><a href="/">Home</a></li>
+      
+        <li><a href="/archives">Archives</a></li>
+      
+        <li><a href="/about">About</a></li>
+      
+    </ul>
+  </nav>
+</header>
+
+    <main class="site-main posts-loop">
+    <article>
+
+  
+    
+    <h3 class="article-title"><span>nfs server 部署</span></h3>
+    
+  
+
+  <div class="article-top-meta">
+    <span class="posted-on">
+      <a href="/2023/09/06/nfs-server-deploy/" rel="bookmark">
+        <time class="entry-date published" datetime="2023-09-06T06:08:34.000Z">
+          2023-09-06
+        </time>
+      </a>
+    </span>
+  </div>
+
+
+  
+
+  <div class="article-content">
+    <div class="entry">
+      
+        <p>以ubuntu安装为例</p>
+<h3 id="nfs安装"><a href="#nfs安装" class="headerlink" title="nfs安装"></a>nfs安装</h3><p>安装 NFS 内核服务器包，这实际上会将其变成 NFS 服务器</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt update</span><br><span class="line">sudo apt install nfs-kernel-server</span><br></pre></td></tr></table></figure>
+
+<p>验证 nfs-server 服务是否正在运行</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl status nfs-server</span><br></pre></td></tr></table></figure>
+
+<h3 id="创建-NFS-共享目录"><a href="#创建-NFS-共享目录" class="headerlink" title="创建 NFS 共享目录"></a>创建 NFS 共享目录</h3><p>创建 &#x2F;mnt&#x2F;nfs 文件目录，用于共享</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo mkdir -p /mnt/nfs</span><br></pre></td></tr></table></figure>
+
+<p>分配以下目录所有权和权限,这些权限是递归的，将应用于创建的所有文件和子目录</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo chown nobody:nogroup /mnt/nfs</span><br><span class="line">sudo chmod -R 777 /mnt/nfs</span><br></pre></td></tr></table></figure>
+
+<h3 id="设置访问权限"><a href="#设置访问权限" class="headerlink" title="设置访问权限"></a>设置访问权限</h3><p>创建 NFS 目录共享并分配所需的权限和所有权后，需要允许客户端系统访问 NFS 服务器。通过编辑在安装 nfs-kernel-server 软件包期间创建的 &#x2F;etc&#x2F;exports 文件来实现这一点</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo vim /etc/exports</span><br></pre></td></tr></table></figure>
+
+<p>设置运行访问的 IP 范围, * 表示允许任意 ip 访问。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/mnt/nfs 192.168.32.0/24(rw,sync,no_root_squash,no_subtree_check)</span><br></pre></td></tr></table></figure>
+<p>常用选项：</p>
+<ul>
+<li>ro：客户端挂载后，其权限为只读，默认选项；</li>
+<li>rw:读写权限；</li>
+<li>sync：同时将数据写入到内存与硬盘中；</li>
+<li>async：异步，优先将数据保存到内存，然后再写入硬盘；</li>
+<li>Secure：要求请求源的端口小于1024</li>
+</ul>
+<p>用户映射：</p>
+<ul>
+<li>root_squash:当NFS客户端使用root用户访问时，映射到NFS服务器的匿名用户；</li>
+<li>no_root_squash:当NFS客户端使用root用户访问时，映射到NFS服务器的root用户；</li>
+<li>all_squash:全部用户都映射为服务器端的匿名用户；</li>
+<li>anonuid&#x3D;UID：将客户端登录用户映射为此处指定的用户uid；</li>
+<li>anongid&#x3D;GID：将客户端登录用户映射为此处指定的用户gid</li>
+</ul>
+<h3 id="导出共享目录"><a href="#导出共享目录" class="headerlink" title="导出共享目录"></a>导出共享目录</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo exportfs -a</span><br></pre></td></tr></table></figure>
+
+<p>确定导出列表，可以使用以下命令显示导出列表</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo exportfs -s</span><br><span class="line"># /mnt/nfs  192.168.32.0/24(rw,wdelay,no_root_squash,no_subtree_check,sec=sys,rw,secure,no_root_squash,no_all_squash)</span><br></pre></td></tr></table></figure>
+
+<h3 id="配置防火墙规则"><a href="#配置防火墙规则" class="headerlink" title="配置防火墙规则"></a>配置防火墙规则</h3><p>查看防火墙状态</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo ufw status</span><br><span class="line"># Status: inactive</span><br></pre></td></tr></table></figure>
+
+<p>提示防火墙未激活，很好，否则，我们需要添加如下规则</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo ufw allow from 192.168.32.0/24 to any port nfs</span><br></pre></td></tr></table></figure>
+
+<h3 id="安装-NFS-客户端"><a href="#安装-NFS-客户端" class="headerlink" title="安装 NFS 客户端"></a>安装 NFS 客户端</h3><p>为了让所有的 Worker 节点都可以使用 NFS 服务器，需要在每个 Worker 节点上安装 NFS 客户端。<br>现在登录到 Worker 节点更新包索引并安装 nfs-common</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt update</span><br><span class="line">sudo apt install nfs-common</span><br></pre></td></tr></table></figure>
+
+<h3 id="测试文件挂载"><a href="#测试文件挂载" class="headerlink" title="测试文件挂载"></a>测试文件挂载</h3><p>创建挂载的文件夹</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p /nfs-data</span><br></pre></td></tr></table></figure>
+<p>执行以下命令挂载 nfs 服务器上的共享目录到本机路径<code>/nfs-data</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mount -t nfs -o nolock,vers=4 192.168.32.24:/nfs /nfs-data</span><br></pre></td></tr></table></figure>
+
+<p>参数解释：</p>
+<ul>
+<li>mount：挂载命令</li>
+<li>o：挂载选项</li>
+<li>nfs :使用的协议</li>
+<li>nolock :不阻塞</li>
+<li>vers : 使用的NFS版本号</li>
+<li>IP : NFS服务器的IP（NFS服务器运行在哪个系统上，就是哪个系统的IP）</li>
+<li>&#x2F;nfs: 要挂载的目录（Ubuntu的目录）</li>
+<li>&#x2F;nfs-data : 要挂载到的目录（开发板上的目录，注意挂载成功后，&#x2F;mnt下原有数据将会被隐藏，无法找到）</li>
+</ul>
+<p>查看挂载</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">df -h</span><br></pre></td></tr></table></figure>
+
+<p>卸载挂载</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">umount /nfs-data</span><br></pre></td></tr></table></figure>
+
+<p>检查 nfs 服务器端是否有设置共享目录</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># showmount -e $(nfs服务器的IP)</span><br><span class="line">showmount -e 172.16.106.205</span><br><span class="line"></span><br><span class="line"># 输出结果如下所示</span><br><span class="line">Export list for 172.16.106.205:</span><br><span class="line">/nfs *</span><br></pre></td></tr></table></figure>
+
+<p>查看nfs版本</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># 查看nfs服务端信息(服务端执行)</span><br><span class="line">nfsstat -s</span><br><span class="line"></span><br><span class="line"># 查看nfs客户端信息（客户端执行）</span><br><span class="line">nfsstat -c</span><br></pre></td></tr></table></figure>
+
+<p>写入一个测试文件</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo &quot;hello nfs server&quot; &gt; /nfs-data/test.txt</span><br></pre></td></tr></table></figure>
+
+<p>在 nfs 服务器上执行以下命令，验证文件写入成功：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /nfs/test.txt</span><br></pre></td></tr></table></figure>
+      
+    </div>
+
+  </div>
+
+  <div class="article-footer">
+    <div class="article-meta pull-left">
+
+    
+
+    
+    
+
+    <span class="post-tags">
+      <i class="icon-tags"></i>
+        <a href="/tags/k8s/">k8s</a>
+    </span>
+    
+
+    </div>
+
+    
+  </div>
+</article>
+
+  
+
+
+
+
+
+
+
+
+
+    </main>
+
+    <footer class="site-footer">
+  <p class="site-info">
+    Proudly powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and
+    Theme by <a href="https://github.com/CodeDaraW/Hacker" target="_blank">Hacker</a>
+    </br>
+    
+    &copy; 2023 ryan zou
+    
+  </p>
+</footer>
+    
+    
+  </div>
+</div>
+</body>
+</html>
