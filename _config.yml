@@ -3,17 +3,17 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: ryan zou
+title: 0xryan
 subtitle: ''
 description: 'a man, likes hiking and camping'
 keywords:
-author: ryan zou
+author: 0xryan
 language: en
 timezone: 'Asia/Shanghai'
 
 # URL
 ## Set your site url here. For example, if you use GitHub Page, set url as 'https://username.github.io/project'
-url: https://0xryanz.github.io
+url: https://0xryan.xyz
 permalink: :year/:month/:day/:title/
 permalink_defaults:
 pretty_urls:
@@ -97,7 +97,7 @@ ignore:
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: Hacker
+theme: polk
 
 # Deployment
 ## Docs: https://hexo.io/docs/one-command-deployment
