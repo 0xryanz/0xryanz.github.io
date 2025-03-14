@@ -1,0 +1,163 @@
+body {
+  margin: 0;
+  font-size: 16px;
+}
+
+html, body {
+  height: 100%;
+  font-family: 'Noto Serif', serif;
+  color: #000;
+}
+
+.center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+}
+
+.container {
+  max-width: 840px;
+  margin: 0 auto;
+  font-family: 'Hiragino Sans GB', 'Microsoft YaHei', 'WenQuanYi Micro Hei', sans-serif;
+  color: #000;
+  height: 100%;
+}
+
+a {
+  color: #000;
+  text-decoration: none;
+}
+
+h1 {
+  font-family: 'Noto Serif', serif;
+  font-size: 20px;
+  font-weight: bold;
+}
+h2 {
+  font-size: 18px;
+}
+h3 {
+  font-size: 16px;
+  font-style: italic;
+}
+
+.home {
+  display: table;
+  width: 100%;
+  height: 100%;
+
+  .info {
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+
+    .logo {
+      font-family: 'Noto Serif', serif;
+      font-size: 2.5em;
+      font-weight: bold;
+      background-color: black;
+      padding-left: 0.25em;
+      padding-right: 0.25em;
+      color: white;
+    }
+
+    .subtitle {
+      padding: 0.25em;
+      font-size: 20px;
+      color: #5e5e5e;
+    }
+
+    .sns {
+      margin: 1.5em auto;
+
+      a {
+        width: 55px;
+        color: #999;
+        display: inline-block;
+        font-weight: 700;
+
+        &:hover {
+          color: #0000FF;
+        }
+      }
+    }
+
+    footer {
+      border: 0;
+      color: #000;
+      padding: 0;
+    }
+  }
+}
+
+.page {
+  margin-bottom: 2em;
+  
+  p {
+    line-height: 24px;
+  }
+}
+
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+
+/* Tomorrow Comment */
+.highlight .comment,
+.highlight .quote {
+  color: #8e908c;
+}
+
+/* Tomorrow Red */
+.highlight .variable,
+.highlight .template-variable,
+.highlight .tag,
+.highlight .name,
+.highlight .selector-id,
+.highlight .selector-class,
+.highlight .regexp,
+.highlight .deletion {
+  color: #c82829;
+}
+
+/* Tomorrow Orange */
+.highlight .number,
+.highlight .built_in,
+.highlight .builtin-name,
+.highlight .literal,
+.highlight .type,
+.highlight .params,
+.highlight .meta,
+.highlight .link {
+  color: #f5871f;
+}
+
+.hide {
+  display: none;
+}
+
+.myDIV:hover + .hide {
+  display: block;
+  color: #800;
+}
+
+.highlight {
+  display: block;
+  overflow-x: auto;
+  background: white;
+  color: #4d4d4c;
+  padding: 0.5em;
+}
+
+.highlight .emphasis {
+  font-style: italic;
+}
+
+.highlight .strong {
+  font-weight: bold;
+}
+
+@import "_partial/header";
+@import "_partial/post";
+@import "_partial/archive";
+@import "_partial/paginator";
+@import "_partial/footer";

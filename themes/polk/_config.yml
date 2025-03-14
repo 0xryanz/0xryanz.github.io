@@ -1,0 +1,52 @@
+# Favicon
+favicon: /favicon.ico
+
+# SEO
+keywords: 0xryan 
+
+# Site title separator
+separator: '-'
+
+# SNS config
+sns:
+  Enter: /archives
+
+# Nav menu
+menu:
+  Index: /
+  Archives: /archives
+  About: /about
+
+# Security
+encrypt: # hexo-blog-encrypt
+  enable: false
+  abstract: [redacted]
+  message: 請輸入密碼.
+  tags:
+  - {name: Avian, password: 12BD761}
+  wrong_pass_message: 抱歉, 密碼錯誤.
+  wrong_hash_message: 抱歉, 此文章不能被校驗.
+  theme: default
+
+# advanced markdown
+markdown_it_plus:
+    highlight: true
+    html: true
+    xhtmlOut: true
+    breaks: true
+    langPrefix:
+    linkify: true
+    typographer:
+    quotes: “”‘’
+    pre_class: highlight
+
+toc:
+  maxdepth: 3
+  class: toc
+  slugify: transliteration
+  decodeEntities: false
+  anchor:
+    position: after
+    symbol: '#'
+    style: header-anchor
+

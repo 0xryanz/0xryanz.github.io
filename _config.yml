@@ -3,9 +3,9 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: 0xryan
+title: 0xryan的思考空间
 subtitle: ''
-description: 'a man, likes hiking and camping'
+description: '0xryan的思考空间'
 keywords:
 author: 0xryan
 language: en
@@ -13,7 +13,7 @@ timezone: 'Asia/Shanghai'
 
 # URL
 ## Set your site url here. For example, if you use GitHub Page, set url as 'https://username.github.io/project'
-url: https://0xryan.xyz
+url: https://0xryanz.github.io
 permalink: :year/:month/:day/:title/
 permalink_defaults:
 pretty_urls:
